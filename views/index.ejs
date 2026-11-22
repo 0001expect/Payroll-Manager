@@ -1,0 +1,81 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Payroll Manager</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+    <h1>Payroll Manager</h1>
+    <p>Manage employees and their payroll details.</p>
+
+    <br>
+    <a href="/add">+ Add Employee</a>
+
+    <h2>Payroll Overview</h2>
+
+    <div class="summary">
+        <div class="summary-card">
+            <p>Total Basic Salary</p>
+            <h2><%= summary.basicSalaryFormatted %></h2>
+        </div>
+
+        <div class="summary-card">
+            <p>Total Tax</p>
+            <h2><%= summary.taxFormatted %></h2>
+        </div>
+
+        <div class="summary-card">
+            <p>Total Net Salary</p>
+            <h2><%= summary.netFormatted %></h2>
+        </div>
+    </div>
+
+    <h2>Employees</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Basic Salary</th>
+                <th>Tax (10%)</th>
+                <th>Net Salary</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <% employees.forEach(emp => { %>
+                <tr>
+                    <td><%= emp.name %></td>
+                    <td><%= emp.department %></td>
+                    <td><%= emp.basicSalaryFormatted %></td>
+                    <td><%= emp.taxFormatted %></td>
+                    <td><%= emp.netFormatted %></td>
+                    <td>
+                        <a href="/edit/<%= emp.id %>">Edit</a>
+
+                        <form action="/delete/<%= emp.id %>"
+                              method="POST"
+                              style="display: inline;"
+                              onsubmit="return confirm('Delete this employee?');">
+                            <button type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            <% }) %>
+
+            <% if (employees.length === 0) { %>
+                <tr>
+                    <td colspan="6">No employees added yet.</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+
+</body>
+</html>

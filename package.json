@@ -1,0 +1,23 @@
+
+{
+  "name": "payroll-manager",
+  "version": "1.0.0",
+  "description": "An employee payroll management system built using Node.js, Express.js and EJS.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "payroll",
+    "employee-management",
+    "nodejs",
+    "express",
+    "ejs"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ejs": "^7.0.2",
+    "express": "^5.3.0"
+  }
+}
