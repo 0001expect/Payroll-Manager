@@ -1,0 +1,269 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Logs | Payroll Manager</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 35px;
+            background: #151b25;
+            color: #f1f5f9;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+        }
+
+        .muted {
+            color: #a8b5c7;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 11px 17px;
+            border-radius: 7px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .filters, .summary, .table-container {
+            background: #1e293b;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 22px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: end;
+        }
+
+        .filters label {
+            display: block;
+            margin-bottom: 7px;
+            color: #a8b5c7;
+        }
+
+        select {
+            padding: 11px;
+            min-width: 170px;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: white;
+        }
+
+        .summary strong {
+            font-size: 24px;
+            display: block;
+            margin-top: 8px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1050px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+            vertical-align: top;
+        }
+
+        th {
+            color: #a8b5c7;
+            background: #263548;
+            font-size: 13px;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 20px;
+            background: #334155;
+            color: #bfdbfe;
+            font-size: 12px;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 35px;
+            color: #a8b5c7;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            color: white;
+            text-decoration: none;
+            background: #334155;
+            padding: 9px 14px;
+            border-radius: 6px;
+        }
+
+        .pagination a.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <div class="header">
+        <div>
+            <h1>Audit Logs</h1>
+            <p class="muted">Track important activities performed in the system.</p>
+        </div>
+
+        <a href="/" class="button">Back to Dashboard</a>
+    </div>
+
+    <form action="/audit-logs" method="GET" class="filters">
+        <div>
+            <label for="action">Action</label>
+            <select name="action" id="action">
+                <option value="">All Actions</option>
+                <% ['CREATE', 'UPDATE', 'DELETE', 'PROCESS', 'MARK_PAID'].forEach(item => { %>
+                    <option value="<%= item %>" <%= filters.action === item ? 'selected' : '' %>>
+                        <%= item %>
+                    </option>
+                <% }) %>
+            </select>
+        </div>
+
+        <div>
+            <label for="module">Module</label>
+            <select name="module" id="module">
+                <option value="">All Modules</option>
+                <% ['Employee', 'Payroll'].forEach(item => { %>
+                    <option value="<%= item %>" <%= filters.module === item ? 'selected' : '' %>>
+                        <%= item %>
+                    </option>
+                <% }) %>
+            </select>
+        </div>
+
+        <button type="submit" class="button">Apply Filters</button>
+        <a href="/audit-logs" class="button">Clear</a>
+    </form>
+
+    <div class="summary">
+        <span class="muted">Total matching activities</span>
+        <strong><%= totalLogs %></strong>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date & Time</th>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Action</th>
+                    <th>Module</th>
+                    <th>Description</th>
+                    <th>Target ID</th>
+                    <th>IP Address</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <% if (logs.length === 0) { %>
+                    <tr>
+                        <td colspan="8" class="empty">
+                            No audit records found.
+                        </td>
+                    </tr>
+                <% } else { %>
+                    <% logs.forEach(log => { %>
+                        <tr>
+                            <td>
+                                <%= new Date(log.createdAt).toLocaleString('en-IN') %>
+                            </td>
+                            <td><%= log.userName || 'Unknown' %></td>
+                            <td><span class="tag"><%= log.userRole || 'Unknown' %></span></td>
+                            <td><span class="tag"><%= log.action %></span></td>
+                            <td><%= log.module %></td>
+                            <td><%= log.description %></td>
+                            <td><%= log.targetId || '-' %></td>
+                            <td><%= log.ipAddress || '-' %></td>
+                        </tr>
+                    <% }) %>
+                <% } %>
+            </tbody>
+        </table>
+
+        <% if (totalPages > 1) { %>
+            <div class="pagination">
+                <a
+                    class="<%= currentPage <= 1 ? 'disabled' : '' %>"
+                    href="/audit-logs?page=<%= currentPage - 1 %>&action=<%= encodeURIComponent(filters.action) %>&module=<%= encodeURIComponent(filters.module) %>">
+                    Previous
+                </a>
+
+                <span>Page <%= currentPage %> of <%= totalPages %></span>
+
+                <a
+                    class="<%= currentPage >= totalPages ? 'disabled' : '' %>"
+                    href="/audit-logs?page=<%= currentPage + 1 %>&action=<%= encodeURIComponent(filters.action) %>&module=<%= encodeURIComponent(filters.module) %>">
+                    Next
+                </a>
+            </div>
+        <% } %>
+    </div>
+
+</div>
+</body>
+</html>

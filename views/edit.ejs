@@ -6,11 +6,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Edit Employee - Payroll Manager</title>
     <link rel="stylesheet" href="/style.css">
+
+    <style>
+        .employee-form {
+            max-width: 650px;
+            background: #1d2633;
+            border: 1px solid #344153;
+            border-radius: 12px;
+            padding: 25px;
+        }
+
+        .employee-form label {
+            display: block;
+            margin-top: 16px;
+            color: #cbd5e1;
+        }
+
+        .employee-form input {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 5px;
+            background: #141a23;
+            color: #f1f5f9;
+            border: 1px solid #344153;
+            border-radius: 6px;
+        }
+
+        .employee-form input:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            align-items: center;
+        }
+
+        .employee-code {
+            color: #34d399;
+            font-weight: bold;
+        }
+
+        .field-hint {
+            color: #94a3b8;
+            font-size: 13px;
+            margin-top: 3px;
+        }
+    </style>
 </head>
+
 <body>
 
     <h1>Edit Employee</h1>
-    <p>Update the employee details below.</p>
+
+    <p>
+        Employee ID:
+        <span class="employee-code">
+            <%= employee.employeeCode || 'Will be assigned when updated' %>
+        </span>
+    </p>
 
     <% if (errors && errors.length > 0) { %>
         <div class="error">
@@ -20,41 +77,97 @@
         </div>
     <% } %>
 
-    <form method="POST" action="/edit/<%= employee.id %>">
-        <label for="name">Employee Name</label>
+    <form
+        method="POST"
+        action="/edit/<%= employee._id %>"
+        class="employee-form"
+    >
+
+        <label for="name">Employee Name *</label>
         <input
             type="text"
             id="name"
             name="name"
             value="<%= formData.name !== undefined ? formData.name : employee.name %>"
+            minlength="2"
+            maxlength="60"
+            pattern="[A-Za-z][A-Za-z .'-]*"
             required
         >
 
-        <label for="department">Department</label>
+        <label for="email">Email Address</label>
+        <input
+            type="email"
+            id="email"
+            name="email"
+            value="<%= formData.email !== undefined ? formData.email : (employee.email || '') %>"
+            maxlength="120"
+        >
+
+        <label for="phone">Phone Number</label>
+        <input
+            type="tel"
+            id="phone"
+            name="phone"
+            value="<%= formData.phone !== undefined ? formData.phone : (employee.phone || '') %>"
+            inputmode="numeric"
+            pattern="[6-9][0-9]{9}"
+            minlength="10"
+            maxlength="10"
+            title="Enter exactly 10 digits starting with 6, 7, 8 or 9."
+        >
+
+        <p class="field-hint">
+            Enter a 10-digit Indian mobile number without +91 or spaces.
+        </p>
+
+        <label for="designation">Designation</label>
+        <input
+            type="text"
+            id="designation"
+            name="designation"
+            value="<%= formData.designation !== undefined ? formData.designation : (employee.designation || '') %>"
+            maxlength="60"
+        >
+
+        <label for="department">Department *</label>
         <input
             type="text"
             id="department"
             name="department"
             value="<%= formData.department !== undefined ? formData.department : employee.department %>"
+            minlength="2"
+            maxlength="40"
+            pattern="[A-Za-z][A-Za-z &-]*"
             required
         >
 
-        <label for="basicSalary">Basic Salary (₹)</label>
+        <label for="joiningDate">Joining Date</label>
+        <input
+            type="date"
+            id="joiningDate"
+            name="joiningDate"
+            value="<%= formData.joiningDate !== undefined ? formData.joiningDate : (employee.joiningDate ? new Date(employee.joiningDate).toISOString().slice(0, 10) : '') %>"
+        >
+
+        <label for="basicSalary">Basic Salary (₹) *</label>
         <input
             type="number"
             id="basicSalary"
             name="basicSalary"
             step="0.01"
             min="0.01"
+            max="1000000000"
             value="<%= formData.basicSalary !== undefined ? formData.basicSalary : employee.basicSalary %>"
             required
         >
 
-        <button type="submit">Update Employee</button>
-    </form>
+        <div class="form-actions">
+            <button type="submit">Update Employee</button>
+            <a href="/">Cancel</a>
+        </div>
 
-    <br>
-    <a href="/">Back to Dashboard</a>
+    </form>
 
 </body>
 </html>

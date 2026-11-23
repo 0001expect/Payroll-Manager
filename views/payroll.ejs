@@ -1,0 +1,345 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Payroll | Payroll Manager</title>
+    <link rel="stylesheet" href="/style.css">
+
+    <style>
+        .payroll-page {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .payroll-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 25px;
+        }
+
+        .payroll-header h1 { margin-bottom: 6px; }
+
+        .payroll-controls {
+            display: flex;
+            align-items: end;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            background: var(--card-bg, #1e293b);
+        }
+
+        .payroll-controls form {
+            display: flex;
+            align-items: end;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .payroll-controls label {
+            display: block;
+            margin-bottom: 7px;
+        }
+
+        .payroll-controls input {
+            padding: 10px 12px;
+            border-radius: 7px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: #fff;
+        }
+
+        .payroll-button {
+            display: inline-block;
+            border: none;
+            border-radius: 7px;
+            padding: 11px 17px;
+            cursor: pointer;
+            font-weight: 600;
+            color: white;
+            background: #2563eb;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .payroll-button:hover { background: #1d4ed8; }
+        .process-button { background: #16a34a; }
+        .process-button:hover { background: #15803d; }
+        .paid-button { background: #16a34a; padding: 8px 12px; font-size: 12px; }
+        .paid-button:hover { background: #15803d; }
+        .download-button { background: #7c3aed; padding: 8px 12px; font-size: 12px; }
+        .download-button:hover { background: #6d28d9; }
+
+        .payroll-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .payroll-message {
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            background: rgba(22, 163, 74, 0.15);
+            border: 1px solid #16a34a;
+            color: #86efac;
+        }
+
+        .payroll-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 25px;
+        }
+
+        .payroll-card {
+            padding: 20px;
+            border-radius: 12px;
+            background: var(--card-bg, #1e293b);
+        }
+
+        .payroll-card p {
+            margin: 0 0 10px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .payroll-card h2 { margin: 0; font-size: 22px; }
+        .payment-summary-heading { margin: 30px 0 15px; }
+        .payment-card-paid { border-left: 4px solid #16a34a; }
+        .payment-card-pending { border-left: 4px solid #eab308; }
+
+        .payroll-table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+        }
+
+        .payroll-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1050px;
+            background: var(--card-bg, #1e293b);
+        }
+
+        .payroll-table th,
+        .payroll-table td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+        }
+
+        .payroll-table th {
+            color: #94a3b8;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        .payroll-table td { font-size: 14px; }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: rgba(234, 179, 8, 0.15);
+            color: #facc15;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-paid {
+            background: rgba(22, 163, 74, 0.15);
+            color: #86efac;
+        }
+
+        .empty-state {
+            padding: 45px 20px;
+            text-align: center;
+            background: var(--card-bg, #1e293b);
+            border-radius: 12px;
+        }
+
+        .empty-state p { color: #94a3b8; }
+
+        .page-note {
+            color: #94a3b8;
+            font-size: 13px;
+            margin-top: 18px;
+        }
+
+        @media (max-width: 600px) {
+            .payroll-page { padding: 0 12px; }
+            .payroll-controls,
+            .payroll-controls form { width: 100%; }
+            .payroll-controls form > div { width: 100%; }
+            .payroll-controls input { width: 100%; }
+        }
+    </style>
+</head>
+
+<body>
+<main class="payroll-page">
+
+    <header class="payroll-header">
+        <div>
+            <h1>Monthly Payroll</h1>
+            <p>Manage and review monthly employee salary records.</p>
+        </div>
+        <a href="/" class="payroll-button">Back to Dashboard</a>
+    </header>
+
+    <% if (message) { %>
+        <div class="payroll-message"><%= message %></div>
+    <% } %>
+
+    <section class="payroll-controls">
+        <form action="/payroll" method="GET">
+            <div>
+                <label for="month">Select Payroll Month</label>
+                <input type="month" id="month" name="month"
+                       value="<%= month %>" required>
+            </div>
+            <button type="submit" class="payroll-button">View Payroll</button>
+        </form>
+
+        <% if (currentUser && currentUser.role === 'admin') { %>
+            <form action="/payroll/process" method="POST"
+                  onsubmit="return confirm('Process payroll for the selected month? Existing payroll records will not be duplicated.');">
+                <input type="hidden" name="month" value="<%= month %>">
+                <button type="submit" class="payroll-button process-button">
+                    Process Monthly Payroll
+                </button>
+            </form>
+        <% } %>
+
+        <a href="/payroll/history" class="payroll-button">Payroll History</a>
+    </section>
+
+    <section class="payroll-summary">
+        <div class="payroll-card">
+            <p>Total Basic Salary</p>
+            <h2><%= formatCurrency(totals.basicSalary) %></h2>
+        </div>
+        <div class="payroll-card">
+            <p>Total Tax</p>
+            <h2><%= formatCurrency(totals.tax) %></h2>
+        </div>
+        <div class="payroll-card">
+            <p>Total Deductions</p>
+            <h2><%= formatCurrency(totals.deductions) %></h2>
+        </div>
+        <div class="payroll-card">
+            <p>Total Net Salary</p>
+            <h2><%= formatCurrency(totals.netSalary) %></h2>
+        </div>
+    </section>
+
+    <h2 class="payment-summary-heading">Payment Summary</h2>
+
+    <section class="payroll-summary">
+        <div class="payroll-card payment-card-paid">
+            <p>Employees Paid</p>
+            <h2><%= paymentSummary.paidCount %></h2>
+        </div>
+        <div class="payroll-card payment-card-pending">
+            <p>Employees Pending</p>
+            <h2><%= paymentSummary.pendingCount %></h2>
+        </div>
+        <div class="payroll-card payment-card-paid">
+            <p>Total Amount Paid</p>
+            <h2><%= formatCurrency(paymentSummary.paidAmount) %></h2>
+        </div>
+        <div class="payroll-card payment-card-pending">
+            <p>Total Amount Pending</p>
+            <h2><%= formatCurrency(paymentSummary.pendingAmount) %></h2>
+        </div>
+    </section>
+
+    <section>
+        <h2>Payroll Records — <%= month %></h2>
+
+        <% if (records.length > 0) { %>
+            <div class="payroll-table-wrapper">
+                <table class="payroll-table">
+                    <thead>
+                        <tr>
+                            <th>Employee ID</th>
+                            <th>Employee</th>
+                            <th>Department</th>
+                            <th>Basic Salary</th>
+                            <th>Tax</th>
+                            <th>Deductions</th>
+                            <th>Net Salary</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% records.forEach(record => { %>
+                            <tr>
+                                <td><%= record.employeeCode %></td>
+                                <td><%= record.employeeName %></td>
+                                <td><%= record.department %></td>
+                                <td><%= formatCurrency(record.basicSalary) %></td>
+                                <td><%= formatCurrency(record.tax) %></td>
+                                <td><%= formatCurrency(record.deductions) %></td>
+                                <td><strong><%= formatCurrency(record.netSalary) %></strong></td>
+                                <td>
+                                    <span class="status-badge <%= record.status === 'Paid' ? 'status-paid' : '' %>">
+                                        <%= record.status %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="payroll-actions">
+                                        <a href="/payroll/<%= record._id %>/slip.pdf"
+                                           class="payroll-button download-button">
+                                            Download Salary Slip
+                                        </a>
+
+                                        <% if (currentUser && currentUser.role === 'admin' && record.status !== 'Paid') { %>
+                                            <form action="/payroll/<%= record._id %>/mark-paid"
+                                                  method="POST"
+                                                  onsubmit="return confirm('Mark this payroll record as Paid?');">
+                                                <button type="submit" class="payroll-button paid-button">
+                                                    Mark as Paid
+                                                </button>
+                                            </form>
+                                        <% } else if (record.status === 'Paid') { %>
+                                            <span class="status-paid">Payment Confirmed</span>
+                                        <% } else { %>
+                                            <span>Admin only</span>
+                                        <% } %>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        <% } else { %>
+            <div class="empty-state">
+                <h3>No Payroll Records Found</h3>
+                <p>There are no active employee payroll records for <strong><%= month %></strong>.</p>
+                <% if (currentUser && currentUser.role === 'admin') { %>
+                    <p>Use Process Monthly Payroll to generate records for current employees.</p>
+                <% } %>
+            </div>
+        <% } %>
+    </section>
+
+    <p class="page-note">
+        Tax uses the 10% demonstration rate. Existing payroll records are retained
+        for financial history. Marking a record as Paid is a manual status update
+        and does not transfer money.
+    </p>
+
+</main>
+</body>
+</html>

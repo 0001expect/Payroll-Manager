@@ -1,0 +1,171 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll History | Payroll Manager</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .history-page {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .history-header p {
+            color: #94a3b8;
+        }
+
+        .history-table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+        }
+
+        .history-table {
+            width: 100%;
+            min-width: 850px;
+            border-collapse: collapse;
+            background: var(--card-bg, #1e293b);
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+        }
+
+        .history-table th {
+            color: #94a3b8;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        .history-table td {
+            font-size: 14px;
+        }
+
+        .history-button {
+            display: inline-block;
+            padding: 9px 13px;
+            border-radius: 7px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .history-button:hover {
+            background: #1d4ed8;
+        }
+
+        .empty-history {
+            padding: 45px 20px;
+            text-align: center;
+            border-radius: 12px;
+            background: var(--card-bg, #1e293b);
+        }
+
+        .empty-history p {
+            color: #94a3b8;
+        }
+
+        @media (max-width: 600px) {
+            .history-page {
+                padding: 0 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="history-page">
+
+        <header class="history-header">
+            <div>
+                <h1>Payroll History</h1>
+                <p>Review previously processed monthly payroll records.</p>
+            </div>
+
+            <a href="/payroll" class="history-button">
+                Back to Monthly Payroll
+            </a>
+        </header>
+
+        <% if (history.length > 0) { %>
+
+            <div class="history-table-wrapper">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Payroll Month</th>
+                            <th>Employees</th>
+                            <th>Basic Salary</th>
+                            <th>Total Tax</th>
+                            <th>Deductions</th>
+                            <th>Net Salary</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <% history.forEach(item => { %>
+                            <tr>
+                                <td><strong><%= item._id %></strong></td>
+                                <td><%= item.totalEmployees %></td>
+                                <td>
+                                    ₹<%= Number(item.totalBasicSalary).toLocaleString('en-IN', { maximumFractionDigits: 2 }) %>
+                                </td>
+                                <td>
+                                    ₹<%= Number(item.totalTax).toLocaleString('en-IN', { maximumFractionDigits: 2 }) %>
+                                </td>
+                                <td>
+                                    ₹<%= Number(item.totalDeductions).toLocaleString('en-IN', { maximumFractionDigits: 2 }) %>
+                                </td>
+                                <td>
+                                    <strong>
+                                        ₹<%= Number(item.totalNetSalary).toLocaleString('en-IN', { maximumFractionDigits: 2 }) %>
+                                    </strong>
+                                </td>
+                                <td>
+                                    <a
+                                        class="history-button"
+                                        href="/payroll?month=<%= encodeURIComponent(item._id) %>"
+                                    >
+                                        View Details
+                                    </a>
+                                    <a
+                                        class="history-button"
+                                        href="/payroll/export?month=<%= encodeURIComponent(item._id) %>"
+                                    >
+                                        Export CSV
+                                    </a>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+        <% } else { %>
+
+            <section class="empty-history">
+                <h2>No Payroll History Yet</h2>
+                <p>Once you process monthly payroll, its summary will appear here.</p>
+            </section>
+
+        <% } %>
+
+    </main>
+</body>
+</html>

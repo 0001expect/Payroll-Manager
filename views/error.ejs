@@ -10,16 +10,18 @@
 <body>
 
     <div class="error-page">
+
         <h1><%= statusCode || 500 %></h1>
 
         <h2><%= message || 'Something went wrong.' %></h2>
 
         <p>
             Sorry, we couldn't complete your request.
+            Please try again.
         </p>
 
-        <br>
-        <a href="/">Back to Dashboard</a>
+        <a href="/" class="action-btn">Back to Dashboard</a>
+
     </div>
 
 </body>

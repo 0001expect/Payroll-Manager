@@ -6,18 +6,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Payroll Manager</title>
     <link rel="stylesheet" href="/style.css">
+
+    <style>
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .user-panel {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            color: #cbd5e1;
+        }
+
+        .logout-form {
+            display: inline;
+            margin: 0;
+        }
+
+        .logout-btn {
+            background: #dc2626;
+            color: #ffffff;
+            border: 1px solid #ef4444;
+            padding: 9px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background: #b91c1c;
+        }
+
+        .profile-link {
+            display: inline-block;
+            margin-right: 8px;
+        }
+    </style>
 </head>
+
 <body>
 
-    <h1>Payroll Manager</h1>
-    <p>Manage employees and their payroll details.</p>
+    <div class="dashboard-header">
+        <div>
+            <h1>Payroll Manager</h1>
+            <p>Manage employees and their payroll details.</p>
+        </div>
 
-    <br>
-    <a href="/add">+ Add Employee</a>
+        <div class="user-panel">
+            <span>
+                Logged in as:
+                <strong><%= currentUser.name %></strong>
+                (<%= currentUser.role.toUpperCase() %>)
+            </span>
+
+            <form action="/logout" method="POST" class="logout-form">
+                <button type="submit" class="logout-btn">Logout</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="dashboard-actions">
+        <a href="/add" class="action-btn">+ Add Employee</a>
+
+        <a
+            href="/export?search=<%= encodeURIComponent(search || '') %>&department=<%= encodeURIComponent(selectedDepartment || '') %>&sort=<%= encodeURIComponent(sort || '') %>"
+            class="action-btn export-btn"
+        >
+            Export Payroll CSV
+        </a>
+    </div>
 
     <h2>Payroll Overview</h2>
 
     <div class="summary">
+
+        <div class="summary-card">
+            <p>Total Employees</p>
+            <h2><%= totalEmployees %></h2>
+        </div>
+
         <div class="summary-card">
             <p>Total Basic Salary</p>
             <h2><%= summary.basicSalaryFormatted %></h2>
@@ -32,50 +104,149 @@
             <p>Total Net Salary</p>
             <h2><%= summary.netFormatted %></h2>
         </div>
+
     </div>
 
     <h2>Employees</h2>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Department</th>
-                <th>Basic Salary</th>
-                <th>Tax (10%)</th>
-                <th>Net Salary</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
+    <form action="/" method="GET" class="filter-form">
 
-        <tbody>
-            <% employees.forEach(emp => { %>
-                <tr>
-                    <td><%= emp.name %></td>
-                    <td><%= emp.department %></td>
-                    <td><%= emp.basicSalaryFormatted %></td>
-                    <td><%= emp.taxFormatted %></td>
-                    <td><%= emp.netFormatted %></td>
-                    <td>
-                        <a href="/edit/<%= emp.id %>">Edit</a>
+        <input
+            type="text"
+            name="search"
+            placeholder="Search employee by name..."
+            value="<%= search || '' %>"
+        >
 
-                        <form action="/delete/<%= emp.id %>"
-                              method="POST"
-                              style="display: inline;"
-                              onsubmit="return confirm('Delete this employee?');">
-                            <button type="submit">Delete</button>
-                        </form>
-                    </td>
-                </tr>
+        <select name="department">
+            <option value="">All Departments</option>
+
+            <% departments.forEach(dept => { %>
+                <option
+                    value="<%= dept %>"
+                    <%= selectedDepartment === dept ? 'selected' : '' %>
+                >
+                    <%= dept %>
+                </option>
             <% }) %>
+        </select>
 
-            <% if (employees.length === 0) { %>
+        <select name="sort">
+            <option value="">Default Order</option>
+
+            <option value="name_asc" <%= sort === 'name_asc' ? 'selected' : '' %>>
+                Name: A to Z
+            </option>
+
+            <option value="name_desc" <%= sort === 'name_desc' ? 'selected' : '' %>>
+                Name: Z to A
+            </option>
+
+            <option value="salary_low" <%= sort === 'salary_low' ? 'selected' : '' %>>
+                Salary: Low to High
+            </option>
+
+            <option value="salary_high" <%= sort === 'salary_high' ? 'selected' : '' %>>
+                Salary: High to Low
+            </option>
+        </select>
+
+        <button type="submit">Apply</button>
+        <a href="/">Clear Filters</a>
+
+    </form>
+
+    <p>
+        Showing
+        <%= totalEmployees === 0 ? 0 : (currentPage - 1) * pageSize + 1 %>
+        -
+        <%= Math.min(currentPage * pageSize, totalEmployees) %>
+        of <%= totalEmployees %> employees
+    </p>
+
+    <div class="table-container">
+        <table>
+            <thead>
                 <tr>
-                    <td colspan="6">No employees added yet.</td>
+                    <th>Employee ID</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Basic Salary</th>
+                    <th>Tax (10%)</th>
+                    <th>Net Salary</th>
+                    <th>Actions</th>
                 </tr>
+            </thead>
+
+            <tbody>
+                <% employees.forEach(emp => { %>
+                    <tr>
+                        <td>
+                            <%= emp.employeeCode || ('EMP-' + emp._id.toString().slice(-8).toUpperCase()) %>
+                        </td>
+
+                        <td><%= emp.name %></td>
+                        <td><%= emp.department %></td>
+                        <td><%= emp.basicSalaryFormatted %></td>
+                        <td><%= emp.taxFormatted %></td>
+                        <td><%= emp.netFormatted %></td>
+
+                        <td>
+                            <a class="profile-link" href="/employees/<%= emp._id %>">
+                                Profile
+                            </a>
+
+                            <a href="/edit/<%= emp._id %>">Edit</a>
+
+                            <% if (currentUser.role === 'admin') { %>
+                                <form
+                                    action="/delete/<%= emp._id %>"
+                                    method="POST"
+                                    style="display: inline;"
+                                    onsubmit="return confirm('Delete this employee?');"
+                                >
+                                    <button type="submit">Delete</button>
+                                </form>
+                            <% } %>
+                        </td>
+                    </tr>
+                <% }) %>
+
+                <% if (employees.length === 0) { %>
+                    <tr>
+                        <td colspan="7">No employees found.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <% if (totalPages > 1) { %>
+        <div class="pagination">
+
+            <% if (currentPage > 1) { %>
+                <a href="/?search=<%= encodeURIComponent(search || '') %>&department=<%= encodeURIComponent(selectedDepartment || '') %>&sort=<%= encodeURIComponent(sort || '') %>&page=<%= currentPage - 1 %>">
+                    Previous
+                </a>
             <% } %>
-        </tbody>
-    </table>
+
+            <% for (let pageNumber = 1; pageNumber <= totalPages; pageNumber++) { %>
+                <a
+                    href="/?search=<%= encodeURIComponent(search || '') %>&department=<%= encodeURIComponent(selectedDepartment || '') %>&sort=<%= encodeURIComponent(sort || '') %>&page=<%= pageNumber %>"
+                    class="<%= currentPage === pageNumber ? 'active' : '' %>"
+                >
+                    <%= pageNumber %>
+                </a>
+            <% } %>
+
+            <% if (currentPage < totalPages) { %>
+                <a href="/?search=<%= encodeURIComponent(search || '') %>&department=<%= encodeURIComponent(selectedDepartment || '') %>&sort=<%= encodeURIComponent(sort || '') %>&page=<%= currentPage + 1 %>">
+                    Next
+                </a>
+            <% } %>
+
+        </div>
+    <% } %>
 
 </body>
 </html>

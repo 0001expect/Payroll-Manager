@@ -1,0 +1,415 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title><%= employee.name %> - Employee Profile</title>
+
+    <link rel="stylesheet" href="/style.css">
+
+    <style>
+        .profile-container {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            background: #1d2633;
+            border: 1px solid #344153;
+            border-radius: 12px;
+            padding: 25px;
+        }
+
+        .profile-header h1 {
+            margin-bottom: 8px;
+        }
+
+        .employee-id {
+            color: #34d399;
+            font-weight: bold;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .profile-card {
+            background: #1d2633;
+            border: 1px solid #344153;
+            border-radius: 10px;
+            padding: 20px;
+            min-width: 0;
+        }
+
+        .profile-card p {
+            margin: 7px 0;
+            color: #94a3b8;
+            overflow-wrap: anywhere;
+        }
+
+        .profile-card strong {
+            color: #f1f5f9;
+            overflow-wrap: anywhere;
+        }
+
+        .profile-card h2 {
+            color: #34d399;
+            font-size: 21px;
+            overflow-wrap: anywhere;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 22px;
+            flex-wrap: wrap;
+        }
+
+        .history-section {
+            margin-top: 35px;
+        }
+
+        .history-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .history-card {
+            background: #1d2633;
+            border: 1px solid #344153;
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .history-card p {
+            color: #94a3b8;
+            margin: 0 0 10px;
+        }
+
+        .history-card h2 {
+            color: #34d399;
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .history-table-wrapper {
+            overflow-x: auto;
+            border-radius: 10px;
+        }
+
+        .history-table {
+            width: 100%;
+            min-width: 850px;
+            border-collapse: collapse;
+            background: #1d2633;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #344153;
+        }
+
+        .history-table th {
+            color: #94a3b8;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        .history-table td {
+            color: #f1f5f9;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(234, 179, 8, 0.15);
+            color: #facc15;
+        }
+
+        .status-paid {
+            background: rgba(22, 163, 74, 0.15);
+            color: #86efac;
+        }
+
+        .empty-history {
+            padding: 30px;
+            text-align: center;
+            border: 1px solid #344153;
+            border-radius: 10px;
+            background: #1d2633;
+            color: #94a3b8;
+        }
+
+        .section-note {
+            color: #94a3b8;
+            font-size: 13px;
+            margin-top: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-container {
+                padding: 0 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <%
+        let formattedJoiningDate = 'Not provided';
+
+        if (employee.joiningDate) {
+            const dateString = new Date(employee.joiningDate)
+                .toISOString()
+                .slice(0, 10);
+
+            const [year, month, day] = dateString.split('-').map(Number);
+
+            const date = new Date(Date.UTC(year, month - 1, day));
+
+            formattedJoiningDate = date.toLocaleDateString('en-IN', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric',
+                timeZone: 'UTC'
+            });
+        }
+    %>
+
+    <div class="profile-container">
+
+        <div class="profile-header">
+            <div>
+                <h1><%= employee.name %></h1>
+
+                <p>
+                    <span class="employee-id"><%= employeeCode %></span>
+                </p>
+
+                <p>
+                    <%= employee.designation || 'Designation not provided' %>
+                </p>
+            </div>
+
+            <a href="/" class="action-btn">Back to Dashboard</a>
+        </div>
+
+        <h2>Personal Information</h2>
+
+        <div class="profile-grid">
+
+            <div class="profile-card">
+                <p>Employee ID</p>
+                <h2><%= employeeCode %></h2>
+            </div>
+
+            <div class="profile-card">
+                <p>Full Name</p>
+                <h2><%= employee.name %></h2>
+            </div>
+
+            <div class="profile-card">
+                <p>Email Address</p>
+                <strong><%= employee.email || 'Not provided' %></strong>
+            </div>
+
+            <div class="profile-card">
+                <p>Phone Number</p>
+                <strong><%= employee.phone || 'Not provided' %></strong>
+            </div>
+
+            <div class="profile-card">
+                <p>Designation</p>
+                <strong><%= employee.designation || 'Not provided' %></strong>
+            </div>
+
+            <div class="profile-card">
+                <p>Department</p>
+                <strong><%= employee.department %></strong>
+            </div>
+
+            <div class="profile-card">
+                <p>Joining Date</p>
+                <strong><%= formattedJoiningDate %></strong>
+            </div>
+
+            <div class="profile-card">
+                <p>Current Basic Salary</p>
+                <h2><%= basicSalaryFormatted %></h2>
+            </div>
+
+        </div>
+
+        <h2>Current Salary Estimate</h2>
+
+        <div class="profile-grid">
+
+            <div class="profile-card">
+                <p>Current Basic Salary</p>
+                <h2><%= basicSalaryFormatted %></h2>
+            </div>
+
+            <div class="profile-card">
+                <p>Estimated Tax (10%)</p>
+                <h2><%= taxFormatted %></h2>
+            </div>
+
+            <div class="profile-card">
+                <p>Estimated Net Salary</p>
+                <h2><%= netFormatted %></h2>
+            </div>
+
+        </div>
+
+        <section class="history-section">
+
+            <h2>Payroll History</h2>
+
+            <p class="section-note">
+                This section displays payroll records actually processed
+                and stored for this employee.
+            </p>
+
+            <% if (employeePayroll.length > 0) { %>
+
+                <div class="history-summary">
+
+                    <div class="history-card">
+                        <p>Payroll Months</p>
+                        <h2><%= employeePayroll.length %></h2>
+                    </div>
+
+                    <div class="history-card">
+                        <p>Total Basic Salary Recorded</p>
+                        <h2><%= formatCurrency(payrollTotals.basicSalary) %></h2>
+                    </div>
+
+                    <div class="history-card">
+                        <p>Total Tax</p>
+                        <h2><%= formatCurrency(payrollTotals.tax) %></h2>
+                    </div>
+
+                    <div class="history-card">
+                        <p>Total Net Salary</p>
+                        <h2><%= formatCurrency(payrollTotals.netSalary) %></h2>
+                    </div>
+
+                    <div class="history-card">
+                        <p>Payments Completed</p>
+                        <h2><%= payrollTotals.paidCount %></h2>
+                    </div>
+
+                    <div class="history-card">
+                        <p>Payments Pending</p>
+                        <h2><%= payrollTotals.pendingCount %></h2>
+                    </div>
+
+                </div>
+
+                <div class="history-table-wrapper">
+
+                    <table class="history-table">
+
+                        <thead>
+                            <tr>
+                                <th>Month</th>
+                                <th>Basic Salary</th>
+                                <th>Tax</th>
+                                <th>Deductions</th>
+                                <th>Net Salary</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <% employeePayroll.forEach(record => { %>
+
+                                <tr>
+                                    <td><%= record.month %></td>
+
+                                    <td>
+                                        <%= formatCurrency(record.basicSalary) %>
+                                    </td>
+
+                                    <td>
+                                        <%= formatCurrency(record.tax) %>
+                                    </td>
+
+                                    <td>
+                                        <%= formatCurrency(record.deductions) %>
+                                    </td>
+
+                                    <td>
+                                        <strong>
+                                            <%= formatCurrency(record.netSalary) %>
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        <span class="status-badge <%= record.status === 'Paid' ? 'status-paid' : '' %>">
+                                            <%= record.status %>
+                                        </span>
+                                    </td>
+                                </tr>
+
+                            <% }) %>
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            <% } else { %>
+
+                <div class="empty-history">
+                    <h3>No Payroll History Available</h3>
+
+                    <p>
+                        No payroll records have been processed for this employee yet.
+                    </p>
+                </div>
+
+            <% } %>
+
+        </section>
+
+        <div class="profile-actions">
+
+            <a href="/edit/<%= employee._id %>" class="action-btn">
+                Edit Employee
+            </a>
+
+            <a href="/" class="action-btn export-btn">
+                Dashboard
+            </a>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

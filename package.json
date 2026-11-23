@@ -1,23 +1,32 @@
-
 {
   "name": "payroll-manager",
-  "version": "1.0.0",
-  "description": "An employee payroll management system built using Node.js, Express.js and EJS.",
+  "version": "1.1.0",
+  "description": "Employee Payroll Management System with Role-Based Authentication",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "create-user": "node scripts/createUser.js"
   },
   "keywords": [
     "payroll",
     "employee-management",
+    "authentication",
     "nodejs",
     "express",
-    "ejs"
+    "mongodb"
   ],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "connect-mongo": "^5.1.0",
+    "dotenv": "^16.4.7",
     "ejs": "^7.0.2",
-    "express": "^5.3.0"
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.1.0",
+    "express-session": "^1.18.1",
+    "helmet": "^8.1.0",
+    "mongoose": "^9.12.3",
+    "pdfkit": "^0.21.0"
   }
 }
